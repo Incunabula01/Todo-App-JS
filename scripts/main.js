@@ -72,7 +72,7 @@ var view = {
       var toggleCompleteButton = this.createToggleButton();
       var editTodoButton = this.createEditTodoButton();
       var deleteButton = this.createDeleteButton();
-      var todoTextLi = this.createTodoListItem();
+      var todoTextLi = this.createTodoListItem(position);
       
       if (todo.completed === true) {
         toggleCompleteButton.setAttribute('checked', 'checked');
@@ -83,8 +83,10 @@ var view = {
       todoLi.id = position;
       todoLi.appendChild( todoTextLi );
       todoTextLi.value = todo.todoText;
+      // todoTextLi.id = 'edit' + position;
       todoLi.prepend( toggleCompleteButton );
       todoLi.appendChild( editTodoButton );
+      // editTodoButton.id = 'save' + position;
       todoLi.appendChild( deleteButton);
       todosUl.appendChild(todoLi);
     }, this);
@@ -107,9 +109,10 @@ var view = {
     editTodoButton.classList.add('editTodoButton', 'hide');
     return editTodoButton;
   },
-  createTodoListItem: function(){
+  createTodoListItem: function(position){
     var todoListItem = document.createElement('input');
     todoListItem.setAttribute('type', 'text');
+    todoListItem.setAttribute('data-target', position);
     todoListItem.classList.add('edit');
     return todoListItem;
   },
@@ -120,9 +123,7 @@ var view = {
       
       var elementClicked = event.target;
       var todoNumberId = parseInt(elementClicked.parentNode.id);
-      var input = document.querySelector(".edit");
-      var editTodoText = input.value;
-      var todoButton = document.querySelector('.editTodoButton');
+     
       
       if(elementClicked.className === 'deleteButton'){
         handlers.deleteTodo( todoNumberId );
@@ -131,12 +132,31 @@ var view = {
         handlers.toggleCompleted( todoNumberId );
       }
       if(elementClicked.className === 'edit'){
-        // input.focus();
-        todoButton.classList.remove('hide');
+     
+        for(var i =0; i < elementClicked.attributes.length; i++){
+
+          var attr = elementClicked.attributes[i];
+          var sibling = elementClicked.nextElementSibling;
+          var elementId = 0;
+
+          if(attr.name === 'data-target'){
+
+            elementId = parseInt(attr.nodeValue);
+
+            if( todoNumberId === elementId ){
+              this.focus();
+              sibling.classList.toggle('hide');
+              return false;
+            }
+
+          }
+        }
       }
       if(elementClicked.className === 'editTodoButton'){
-        todoButton.classList.add('hide'); 
+             // debugger;
+        var editTodoText = elementClicked.previousElementSibling.value;
         handlers.changeTodo( todoNumberId, editTodoText);
+        elementClicked.classList.toggle('hide'); 
       }
     });
     
